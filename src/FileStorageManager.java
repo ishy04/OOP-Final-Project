@@ -20,8 +20,8 @@ import java.util.List;
  * every i/o call is wrapped in try/catch. missing or messed up files just
  * print a warning and return empty results instead of crashing
  */
-
 public class FileStorageManager {
+
     private static final String DEFAULT_DATA_DIR = "data";
     private static final String USERS_FILE = "users.txt";
     private static final String TASKS_FILE = "tasks.txt";
@@ -65,24 +65,24 @@ public class FileStorageManager {
      * actually stick. each user serializes itself via toStorageLine() which
      * means admins get tagged with "admin" and load back correctly.
      */
-        public void saveUsers(List<User> users) {
-            if (users == null) return;
-            try (BufferedWriter writer = Files.newBufferedWriter(
-                    usersFile,
-                    StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.WRITE)) {
-                for (User user : users) {
-                    if (user == null) continue;
-                    writer.write(user.toStorageLine());
-                    writer.newLine();
-                }
-            } catch (IOException ex) {
-                System.err.println("[FileStorageManager] Failed to save users: " + ex.getMessage());
+    public void saveUsers(List<User> users) {
+        if (users == null) return;
+        try (BufferedWriter writer = Files.newBufferedWriter(
+                usersFile,
+                StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE)) {
+            for (User user : users) {
+                if (user == null) continue;
+                writer.write(user.toStorageLine());
+                writer.newLine();
             }
+        } catch (IOException ex) {
+            System.err.println("[FileStorageManager] Failed to save users: " + ex.getMessage());
         }
-        
+    }
+
     /**
      * reads users back from disk. if the file's missing or broken we just
      * print a warning and hand back an empty list instead of blowing up.
@@ -109,4 +109,52 @@ public class FileStorageManager {
         return users;
     }
 
+    /**
+     * dumps every task to disk. we rewrite the whole file each time so what's
+     * on disk always matches what taskmanager has in memory - that covers the
+     * "save changes right away" requirement.
+     */
+    public void saveTasks(List<Task> tasks) {
+        if (tasks == null) return;
+        try (BufferedWriter writer = Files.newBufferedWriter(
+                tasksFile,
+                StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE)) {
+            for (Task task : tasks) {
+                if (task == null) continue;
+                writer.write(task.toStorageLine());
+                writer.newLine();
+            }
+        } catch (IOException ex) {
+            System.err.println("[FileStorageManager] Failed to save tasks: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * pulls every task back off disk. skips any junk lines so even a half-
+     * corrupted file still gives you something usable.
+     */
+    public List<Task> loadTasks() {
+        List<Task> tasks = new ArrayList<>();
+        if (!Files.exists(tasksFile)) {
+            return tasks;
+        }
+        try (BufferedReader reader = Files.newBufferedReader(tasksFile, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                Task task = Task.fromStorageLine(line);
+                if (task != null) {
+                    tasks.add(task);
+                } else {
+                    System.err.println("[FileStorageManager] Skipping malformed task line.");
+                }
+            }
+        } catch (IOException ex) {
+            System.err.println("[FileStorageManager] Failed to load tasks: " + ex.getMessage());
+        }
+        return tasks;
+    }
 }
