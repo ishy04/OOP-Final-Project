@@ -61,9 +61,7 @@ public class TaskManager {
         loadFromStorage();
     }
 
-    // ---------------------------------------------------------------------
     // login / user management stuff (login + admin use cases)
-    // ---------------------------------------------------------------------
 
     /**
      * uc-01: signs up a new regular user. returns null if the name's taken.
@@ -151,9 +149,7 @@ public class TaskManager {
         return true;
     }
 
-    // ---------------------------------------------------------------------
     // task crud (uc-04, uc-05, uc-06, uc-07)
-    // ---------------------------------------------------------------------
 
     /**
      * uc-04: makes a new task for someone, saves it right away and adds
@@ -245,9 +241,7 @@ public class TaskManager {
         return null;
     }
 
-    // ---------------------------------------------------------------------
     // dashboard, search, filter (uc-03, uc-08, uc-09)
-    // ---------------------------------------------------------------------
 
     public List<Task> getTasksFor(String username) {
         if (username == null) return new ArrayList<>();
@@ -306,9 +300,7 @@ public class TaskManager {
         return new ArrayList<>(tasks);
     }
 
-    // ---------------------------------------------------------------------
     // admin stats (uc-12)
-    // ---------------------------------------------------------------------
 
     public SystemStats computeSystemStats() {
         int totalUsers = users.size();

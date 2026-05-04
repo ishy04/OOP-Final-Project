@@ -18,8 +18,7 @@ import java.util.List;
  * touching anything else.
  *
  * every i/o call is wrapped in try/catch. missing or messed up files just
- * print a warning and return empty results instead of crashing - that's
- * what the design doc asked for.
+ * print a warning and return empty results instead of crashing
  */
 
 public class FileStorageManager {
@@ -60,4 +59,27 @@ public class FileStorageManager {
     public Path getTasksFile() {
         return tasksFile;
     }
+
+    /**
+     * writes out all the users. we always rewrite the whole file so deletes
+     * actually stick. each user serializes itself via toStorageLine() which
+     * means admins get tagged with "admin" and load back correctly.
+     */
+        public void saveUsers(List<User> users) {
+            if (users == null) return;
+            try (BufferedWriter writer = Files.newBufferedWriter(
+                    usersFile,
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE)) {
+                for (User user : users) {
+                    if (user == null) continue;
+                    writer.write(user.toStorageLine());
+                    writer.newLine();
+                }
+            } catch (IOException ex) {
+                System.err.println("[FileStorageManager] Failed to save users: " + ex.getMessage());
+            }
+        }
 }
