@@ -82,4 +82,31 @@ public class FileStorageManager {
                 System.err.println("[FileStorageManager] Failed to save users: " + ex.getMessage());
             }
         }
+        
+    /**
+     * reads users back from disk. if the file's missing or broken we just
+     * print a warning and hand back an empty list instead of blowing up.
+     */
+    public List<User> loadUsers() {
+        List<User> users = new ArrayList<>();
+        if (!Files.exists(usersFile)) {
+            return users;
+        }
+        try (BufferedReader reader = Files.newBufferedReader(usersFile, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                User user = User.fromStorageLine(line);
+                if (user != null) {
+                    users.add(user);
+                } else {
+                    System.err.println("[FileStorageManager] Skipping malformed user line.");
+                }
+            }
+        } catch (IOException ex) {
+            System.err.println("[FileStorageManager] Failed to load users: " + ex.getMessage());
+        }
+        return users;
+    }
+
 }
