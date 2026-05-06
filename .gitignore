@@ -1,0 +1,18 @@
+# Compiled Java bytecode
+*.class
+build/
+out/
+target/
+bin/
+
+# Local persistence (created at runtime by FileStorageManager)
+data/
+
+# IDE / editor metadata
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Logs
+*.log
