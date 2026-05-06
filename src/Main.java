@@ -106,3 +106,60 @@ public class Main {
         System.out.println("Logged out.");
         currentUser = null;
     }
+    
+    // ---------------------------------------------------------------------
+    // main menu (uc-03 dashboard + jumps into all the other use cases)
+    // ---------------------------------------------------------------------
+
+    private void showMainMenu() {
+        System.out.println();
+        System.out.println("--- Main Menu (" + currentUser.getUsername() + ") ---");
+        renderDashboard();
+        System.out.println();
+        System.out.println("1) View all my tasks");
+        System.out.println("2) Create task");
+        System.out.println("3) Edit task");
+        System.out.println("4) Delete task");
+        System.out.println("5) Mark task complete");
+        System.out.println("6) Search tasks");
+        System.out.println("7) Filter tasks");
+        if (currentUser.isAdmin()) {
+            System.out.println("8) Admin: manage users");
+            System.out.println("9) Admin: system statistics");
+        }
+        System.out.println("0) Logout");
+        String choice = prompt("Choose an option: ");
+        switch (choice) {
+            case "1": handleListTasks(); break;
+            case "2": handleCreateTask(); break;
+            case "3": handleEditTask(); break;
+            case "4": handleDeleteTask(); break;
+            case "5": handleMarkComplete(); break;
+            case "6": handleSearchTasks(); break;
+            case "7": handleFilterTasks(); break;
+            case "8":
+                if (currentUser.isAdmin()) handleManageUsers();
+                else System.out.println("Invalid choice.");
+                break;
+            case "9":
+                if (currentUser.isAdmin()) handleSystemStats();
+                else System.out.println("Invalid choice.");
+                break;
+            case "0": handleLogout(); break;
+            default: System.out.println("Invalid choice."); break;
+        }
+    }
+
+    private void renderDashboard() {
+        List<Task> active = taskManager.getActiveTasksFor(currentUser.getUsername());
+        List<Task> completed = taskManager.getCompletedTasksFor(currentUser.getUsername());
+        List<Task> overdue = taskManager.getOverdueTasksFor(currentUser.getUsername());
+        System.out.printf("Dashboard - active: %d, completed: %d, overdue: %d%n",
+                active.size(), completed.size(), overdue.size());
+        if (!overdue.isEmpty()) {
+            System.out.println("  ! Overdue tasks need attention:");
+            for (Task t : overdue) {
+                System.out.println("    - " + t);
+            }
+        }
+    }
